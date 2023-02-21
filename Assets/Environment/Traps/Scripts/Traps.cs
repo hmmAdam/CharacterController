@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
+using UnityEditor;
 using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public class Traps : MonoBehaviour
@@ -9,6 +10,9 @@ public class Traps : MonoBehaviour
     GameObject itemPrefab;
     [SerializeField]
     Sprite icon;
+
+    [SerializeField]
+    float rawDamage = 10f;
 
     [SerializeField]
     string itemName;
@@ -45,35 +49,26 @@ public class Traps : MonoBehaviour
         {
             if (collider.tag == "Player")
             {
-                Interact();
+                Interact(collider.gameObject);
             }
         }
     }
 
-    public void Interact()
+    public void Interact(GameObject playerObject)
     {
-        Debug.Log("Picked up " + transform.name);
+        Debug.Log("Hit by " + transform.name);
 
-        if (isStorable)
+        HealthManager manager = playerObject.GetComponent<HealthManager>();
+        if (manager != null)
         {
-            Store();
-        }
-        else
-        {
-            Use();
+            manager.SendMessageUpwards("Hit ", 10, SendMessageOptions.DontRequireReceiver);
+            
         }
     }
 
-    void Store()
-    {
-        Debug.Log("Storing " + transform.name);
+   
 
-        // TODO Inventory system
-
-        Destroy(gameObject);
-    }
-
-    void Use()
+    void Use(GameObject playerObject)
     {
         Debug.Log("Using " + transform.name);
         if (isConsumable)
@@ -84,5 +79,12 @@ public class Traps : MonoBehaviour
                 Destroy(gameObject);
             }
         }
+
+        HealthManager manager = playerObject.GetComponent<HealthManager>();
+        if (manager != null)
+        {
+            manager.SendMessageUpwards("Hit ", rawDamage, SendMessageOptions.DontRequireReceiver);
+        }
+
     }
 }
